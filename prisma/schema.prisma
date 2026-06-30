@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// The Inbox: near-zero-friction capture, sorted later.
+model InboxItem {
+  id        String   @id @default(cuid())
+  text      String
+  createdAt DateTime @default(now())
+}
+
+// A task, optionally pulled onto Today, optionally a "Quick Win".
+model Task {
+  id            String          @id @default(cuid())
+  title         String
+  done          Boolean         @default(false)
+  doneAt        DateTime?
+  quickWin      Boolean         @default(false)
+  pulledToToday Boolean         @default(false)
+  createdAt     DateTime        @default(now())
+  subtasks      Subtask[]
+  events        MomentumEvent[]
+}
+
+model Subtask {
+  id        String    @id @default(cuid())
+  title     String
+  done      Boolean   @default(false)
+  doneAt    DateTime?
+  taskId    String
+  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+}
+
+// The single append-only ledger. Every win — task, subtask, self-care —
+// writes one row here. Points, levels, proof, and stats are all derived
+// from this table by reading, never by subtracting for behavior.
+model MomentumEvent {
+  id         String   @id @default(cuid())
+  type       String // "task" | "subtask" | "selfcare"
+  label      String
+  points     Int
+  occurredAt DateTime @default(now())
+  taskId     String?
+  task       Task?    @relation(fields: [taskId], references: [id], onDelete: SetNull)
+  selfCareId String? // e.g. "real-break", matches the fixed self-care action list
+  ritualId   String? // links to a Ritual, for type "ritual" events
+}
+
+// Singleton row holding app-wide, non-ledger state.
+model AppState {
+  id                     Int      @id @default(1)
+  recoveryCycleStartedAt DateTime @default(now())
+}
+
+// A reward you've set up for yourself, purchasable with Reward Credits.
+// Retiring a reward hides it without deleting its claim history.
+model Reward {
+  id        String        @id @default(cuid())
+  title     String
+  cost      Int
+  active    Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  claims    RewardClaim[]
+}
+
+// A purchase against the Reward Credits balance. Spending credits never
+// touches the MomentumEvent ledger, so Lifetime Points never goes down.
+model RewardClaim {
+  id          String   @id @default(cuid())
+  rewardId    String
+  reward      Reward   @relation(fields: [rewardId], references: [id], onDelete: Cascade)
+  costAtClaim Int
+  claimedAt   DateTime @default(now())
+}
+
+// An idea, kept separate from actionable tasks so neither gets buried.
+// Resurfaces gently on a schedule; "letting go" archives without deleting.
+model Idea {
+  id             String    @id @default(cuid())
+  text           String
+  status         String    @default("active") // "active" | "let-go" | "promoted"
+  bankedAt       DateTime  @default(now())
+  resurfaceAt    DateTime  @default(now())
+  promotedTaskId String?
+}
+
+// One theme word per calendar month, plus a small set of goals.
+// Light intention-setting — never a schedule.
+model MonthPlan {
+  id        String   @id @default(cuid())
+  monthKey  String   @unique // "2026-06" format
+  word      String?
+  goals     Goal[]
+  createdAt DateTime @default(now())
+}
+
+model Goal {
+  id          String    @id @default(cuid())
+  monthPlanId String
+  monthPlan   MonthPlan @relation(fields: [monthPlanId], references: [id], onDelete: Cascade)
+  title       String
+  good        String?
+  better      String?
+  best        String?
+  createdAt   DateTime  @default(now())
+}
+
+// A standing daily commitment (walk, journal, project check-in) — not a
+// one-off task. Tap once per day cycle, same reset as Work-Recovery.
+model Ritual {
+  id        String   @id @default(cuid())
+  label     String
+  points    Int
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}

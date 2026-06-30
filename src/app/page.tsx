@@ -8,6 +8,7 @@ import { SelfCareGrid } from "@/components/SelfCareGrid";
 import { DailyRituals } from "@/components/DailyRituals";
 import { Pomodoro } from "@/components/Pomodoro";
 import { Nav } from "@/components/Nav";
+import { GoalsPanel } from "@/components/GoalsPanel";
 import { getBalances } from "@/lib/balances";
 import { getLevelProgress } from "@/lib/levels";
 
@@ -63,7 +64,7 @@ export default async function Home() {
       },
       select: { selfCareId: true },
     }),
-    prisma.monthPlan.findUnique({ where: { monthKey } }),
+    prisma.monthPlan.findUnique({ where: { monthKey }, include: { goals: { orderBy: { createdAt: "asc" } } } }),
     prisma.ritual.findMany({ where: { active: true }, orderBy: { createdAt: "asc" } }),
     prisma.momentumEvent.findMany({
       where: {
@@ -113,8 +114,9 @@ export default async function Home() {
             <p className="mb-1 text-xs font-semibold uppercase tracking-[0.15em] text-ivory-dim">
               The Atelier Lair // Command Center
             </p>
-            <h1 className="text-3xl font-bold leading-tight tracking-tight md:text-4xl">
-              The board is yours.<br />Make the next move.
+            <h1 className="text-sm font-bold leading-relaxed tracking-widest uppercase max-w-md" style={{ fontFamily: "var(--font-cinzel)" }}>
+              &ldquo;A king may be the most important piece on the chessboard; however, the queen is the most powerful.&rdquo;
+              <span className="mt-1 block text-sm font-normal text-ivory-dim">— Karim R. Ellis</span>
             </h1>
             <div className="mt-2 flex flex-wrap items-center gap-3">
               <span className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-teal">
@@ -138,16 +140,16 @@ export default async function Home() {
             <StatChip label="Done Today" value={doneTodayCount} accent="ivory" />
             <div className="flex min-w-[140px] flex-col justify-between rounded-xl border border-border bg-bg-panel px-4 py-3">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10px] uppercase tracking-wider text-ivory-dim">
+                <span className="font-numeric text-[10px] uppercase tracking-wider text-ivory-dim">
                   Lvl {levelProgress.level}
                 </span>
-                <span className="text-[10px] text-gold">{levelProgress.percentToNextLevel}%</span>
+                <span className="font-numeric text-[10px] text-gold">{levelProgress.percentToNextLevel}%</span>
               </div>
               <p className="text-sm font-semibold">{levelProgress.name}</p>
               <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-background">
                 <div className="h-full rounded-full bg-gold" style={{ width: `${levelProgress.percentToNextLevel}%` }} />
               </div>
-              <p className="mt-1 text-[10px] text-ivory-dim">
+              <p className="font-numeric mt-1 text-[10px] text-ivory-dim">
                 {levelProgress.isMaxLevel ? "Max level" : `${levelProgress.pointsToNextLevel} pts → ${levelProgress.nextLevelName}`}
               </p>
             </div>
@@ -162,7 +164,7 @@ export default async function Home() {
           className="mb-5 flex items-center justify-between rounded-xl border border-border bg-bg-panel px-4 py-2.5 text-xs text-ivory-dim hover:border-teal hover:text-foreground"
         >
           <span className="font-semibold uppercase tracking-wider text-teal">Trophy Room</span>
-          <span>
+          <span className="font-numeric">
             {thisWeek} pts this week
             {lastWeek > 0 && (
               <span className={weekDelta >= 0 ? "text-teal" : ""}>
@@ -172,6 +174,24 @@ export default async function Home() {
           </span>
           <span>→</span>
         </Link>
+
+        {/* Monthly Goals */}
+        {monthPlan?.goals && monthPlan.goals.length > 0 && (
+          <section className="mb-5 rounded-2xl border border-border bg-bg-panel p-5">
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] uppercase tracking-wider text-ivory-dim">This Month</p>
+                <h2 className="text-lg font-bold">
+                  {monthPlan.word ? `${monthPlan.word} — ` : ""}Goals
+                </h2>
+              </div>
+              <Link href="/plan" className="text-xs text-ivory-dim hover:text-foreground">
+                Edit →
+              </Link>
+            </div>
+            <GoalsPanel word={monthPlan.word ?? null} goals={monthPlan.goals} />
+          </section>
+        )}
 
         {/* 2-column main layout */}
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-5">
@@ -245,7 +265,7 @@ function StatChip({
   return (
     <div className="flex flex-col justify-between rounded-xl border border-border bg-bg-panel px-4 py-3 min-w-[80px]">
       <span className="text-[10px] uppercase tracking-wider text-ivory-dim">{label}</span>
-      <span className={`text-2xl font-bold ${colorMap[accent]}`}>{value}</span>
+      <span className={`text-3xl font-bold ${colorMap[accent]}`} style={{ fontFamily: "var(--font-geist-sans)" }}>{value}</span>
     </div>
   );
 }

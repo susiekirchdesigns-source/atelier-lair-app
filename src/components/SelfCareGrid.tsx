@@ -41,7 +41,7 @@ export function SelfCareGrid({ usedIds }: { usedIds: string[] }) {
               }`}
             >
               <span>{action.label}</span>
-              <span className="text-xs font-bold text-gold">+{action.points}</span>
+              <span className="text-sm font-bold text-gold">+{action.points}</span>
             </button>
           );
         })}

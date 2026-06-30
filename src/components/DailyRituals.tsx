@@ -96,7 +96,7 @@ function RitualButton({ ritual, isUsed }: { ritual: Ritual; isUsed: boolean }) {
         className="flex w-full flex-col gap-1 text-left text-sm font-semibold disabled:cursor-not-allowed"
       >
         <span>{ritual.label}</span>
-        <span className="text-xs font-bold text-gold">+{ritual.points}</span>
+        <span className="text-sm font-bold text-gold">+{ritual.points}</span>
       </button>
       <button
         type="button"

@@ -9,6 +9,7 @@ type Goal = {
   good: string | null;
   better: string | null;
   best: string | null;
+  achievedTier: string | null;
 };
 
 function MonthWordInput({ monthKey, word }: { monthKey: string; word: string | null }) {

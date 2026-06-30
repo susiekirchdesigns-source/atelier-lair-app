@@ -18,11 +18,16 @@
   --color-teal: var(--teal);
   --color-gold: var(--gold);
   --color-border: var(--border);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-playfair);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: radial-gradient(circle at 20% 0%, #241a30 0%, var(--background) 60%) fixed;
   color: var(--foreground);
+}
+
+/* Numeric elements use Geist for legibility */
+.font-numeric {
+  font-family: var(--font-geist-sans);
 }

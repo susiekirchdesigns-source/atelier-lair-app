@@ -104,14 +104,15 @@ model MonthPlan {
 }
 
 model Goal {
-  id          String    @id @default(cuid())
-  monthPlanId String
-  monthPlan   MonthPlan @relation(fields: [monthPlanId], references: [id], onDelete: Cascade)
-  title       String
-  good        String?
-  better      String?
-  best        String?
-  createdAt   DateTime  @default(now())
+  id           String    @id @default(cuid())
+  monthPlanId  String
+  monthPlan    MonthPlan @relation(fields: [monthPlanId], references: [id], onDelete: Cascade)
+  title        String
+  good         String?
+  better       String?
+  best         String?
+  achievedTier String?   // "good" | "better" | "best" | null
+  createdAt    DateTime  @default(now())
 }
 
 // A standing daily commitment (walk, journal, project check-in) — not a

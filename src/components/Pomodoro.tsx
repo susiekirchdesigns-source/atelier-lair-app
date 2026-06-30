@@ -76,7 +76,7 @@ export function Pomodoro() {
       </div>
 
       <div className="my-3 text-center">
-        <span className="text-6xl font-bold tracking-tight text-foreground">
+        <span className="font-numeric text-6xl font-bold tracking-tight text-foreground">
           {String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
         </span>
       </div>

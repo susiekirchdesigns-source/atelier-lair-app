@@ -397,3 +397,29 @@ export async function deleteGoal(goalId: string) {
   await prisma.goal.delete({ where: { id: goalId } });
   revalidatePath("/plan");
 }
+
+const TIER_POINTS = { good: 10, better: 15, best: 25 };
+
+export async function achieveGoalTier(
+  goalId: string,
+  tier: "good" | "better" | "best" | null,
+  goalTitle: string
+) {
+  const goal = await prisma.goal.findUnique({ where: { id: goalId } });
+  if (!goal) return;
+
+  await prisma.goal.update({ where: { id: goalId }, data: { achievedTier: tier } });
+
+  if (tier) {
+    await prisma.momentumEvent.create({
+      data: {
+        type: "goal",
+        label: `Goal (${tier}): ${goalTitle}`,
+        points: TIER_POINTS[tier],
+      },
+    });
+  }
+
+  revalidatePath("/");
+  revalidatePath("/plan");
+}

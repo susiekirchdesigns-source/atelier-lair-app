@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { createRitual, logRitual, retireRitual } from "@/app/actions";
+import { createRitual, logRitual, retireRitual, resetRecoveryCycle } from "@/app/actions";
 
 type Ritual = {
   id: string;
@@ -110,6 +110,20 @@ function RitualButton({ ritual, isUsed }: { ritual: Ritual; isUsed: boolean }) {
   );
 }
 
+function ResetButton() {
+  const [isPending, startTransition] = useTransition();
+  return (
+    <button
+      type="button"
+      disabled={isPending}
+      onClick={() => startTransition(() => resetRecoveryCycle())}
+      className="rounded-lg border border-border px-3.5 py-1.5 text-xs text-ivory-dim hover:border-teal hover:text-foreground disabled:opacity-50"
+    >
+      Reset for New Day
+    </button>
+  );
+}
+
 export function DailyRituals({
   rituals,
   usedIds,
@@ -119,10 +133,11 @@ export function DailyRituals({
 }) {
   return (
     <div>
-      <div className="mb-3.5">
+      <div className="mb-3.5 flex items-center justify-between">
         <h2 className="text-sm font-semibold uppercase tracking-wider text-teal">
           Daily Rituals
         </h2>
+        <ResetButton />
       </div>
 
       <AddRitualForm />
